@@ -26,6 +26,20 @@
         </form>
     </header>
     <main>
+        <div id="addLocModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2>Add Location</h2>
+                <form id="addLocForm">
+                    <label for="locName">Location Name:</label>
+                    <input type="text" id="locName" name="locName" required><br><br>
+                    <label for="locRate">Rate (1-5):</label>
+                    <input type="number" id="locRate" name="locRate" min="1" max="5" value="3" required><br><br>
+                    <input type="hidden" id="geoData" name="geoData">
+                    <button type="submit">Save</button>
+                </form>
+            </div>
+        </div>
         <div class="map"></div>
         <div>
             <section class="locs-container">
@@ -66,6 +80,7 @@
             </section>
         </div>
     </main>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBaRClBmmP7JbZ4YIuV5tMooPUxlcLOQtE&callback=initMap" async defer></script>
     <pre class="debug" hidden></pre>
     <div class="user-msg"></div>
     <script src="lib/swal.js"></script>
