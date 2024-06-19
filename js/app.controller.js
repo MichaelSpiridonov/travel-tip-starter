@@ -1,6 +1,12 @@
-import { utilService } from './services/util.service.js'
-import { locService } from './services/loc.service.js'
-import { mapService } from './services/map.service.js'
+import {
+    utilService
+} from './services/util.service.js'
+import {
+    locService
+} from './services/loc.service.js'
+import {
+    mapService
+} from './services/map.service.js'
 
 window.onload = onInit
 
@@ -54,7 +60,8 @@ function renderLocs(locs) {
                <button title="Edit" onclick="app.onUpdateLoc('${loc.id}')">✏️</button>
                <button title="Select" onclick="app.onSelectLoc('${loc.id}')">🗺️</button>
             </div>     
-        </li>`}).join('')
+        </li>`
+    }).join('')
 
     const elLocList = document.querySelector('.loc-list')
     elLocList.innerHTML = strHTML || 'No locs to show'
@@ -69,17 +76,31 @@ function renderLocs(locs) {
 }
 
 function onRemoveLoc(locId) {
-    if(!confirm('Would you like to delete this location?')) return flashMsg('Location has not been removed')
-    locService.remove(locId)
-        .then(() => {
-            flashMsg('Location removed')
-            unDisplayLoc()
-            loadAndRenderLocs()
-        })
-        .catch(err => {
-            console.error('OOPs:', err)
-            flashMsg('Cannot remove location')
-        })
+    locService.getById(locId).then(location => {
+        Swal.fire({
+            title: `Do you want to remove ${location.name}?`,
+            showDenyButton: true,
+            confirmButtonText: 'Remove',
+            denyButtonText: `Don't Remove`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                locService.remove(locId)
+                    .then(() => {
+                        flashMsg('Location removed')
+                        unDisplayLoc()
+                        loadAndRenderLocs()
+                    })
+                    .catch(err => {
+                        console.error('OOPs:', err)
+                        flashMsg('Cannot remove location')
+                    })
+                Swal.fire(`${location.name} has been Removed!`, '', 'success');
+            } else if (result.isDenied) {
+                flashMsg(`${location.name} has not been removed`)
+                return Swal.fire(`${location.name} has not been removed`, '', 'info');
+            }
+        });
+    })
 }
 
 function onSearchAddress(ev) {
@@ -107,7 +128,9 @@ function onAddLoc(geo) {
     locService.save(loc)
         .then((savedLoc) => {
             flashMsg(`Added Location (id: ${savedLoc.id})`)
-            utilService.updateQueryParams({ locId: savedLoc.id })
+            utilService.updateQueryParams({
+                locId: savedLoc.id
+            })
             loadAndRenderLocs()
         })
         .catch(err => {
@@ -128,7 +151,10 @@ function loadAndRenderLocs() {
 function onPanToUserPos() {
     mapService.getUserPosition()
         .then(latLng => {
-            mapService.panTo({ ...latLng, zoom: 15 })
+            mapService.panTo({
+                ...latLng,
+                zoom: 15
+            })
             unDisplayLoc()
             loadAndRenderLocs()
             flashMsg(`You are at Latitude: ${latLng.lat} Longitude: ${latLng.lng}`)
@@ -182,11 +208,15 @@ function displayLoc(loc) {
     el.querySelector('[name=loc-copier]').value = window.location
     el.classList.add('show')
 
-    utilService.updateQueryParams({ locId: loc.id })
+    utilService.updateQueryParams({
+        locId: loc.id
+    })
 }
 
 function unDisplayLoc() {
-    utilService.updateQueryParams({ locId: '' })
+    utilService.updateQueryParams({
+        locId: ''
+    })
     document.querySelector('.selected-loc').classList.remove('show')
     mapService.setMarker(null)
 }
@@ -224,7 +254,10 @@ function getFilterByFromQueryParams() {
     const queryParams = new URLSearchParams(window.location.search)
     const txt = queryParams.get('txt') || ''
     const minRate = queryParams.get('minRate') || 0
-    locService.setFilterBy({txt, minRate})
+    locService.setFilterBy({
+        txt,
+        minRate
+    })
 
     document.querySelector('input[name="filter-by-txt"]').value = txt
     document.querySelector('input[name="filter-by-rate"]').value = minRate
@@ -254,8 +287,14 @@ function onSetSortBy() {
     loadAndRenderLocs()
 }
 
-function onSetFilterBy({ txt, minRate }) {
-    const filterBy = locService.setFilterBy({ txt, minRate: +minRate })
+function onSetFilterBy({
+    txt,
+    minRate
+}) {
+    const filterBy = locService.setFilterBy({
+        txt,
+        minRate: +minRate
+    })
     utilService.updateQueryParams(filterBy)
     loadAndRenderLocs()
 }
