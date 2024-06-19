@@ -87,7 +87,7 @@ function onRemoveLoc(locId) {
             if (result.isConfirmed) {
                 locService.remove(locId)
                     .then(() => {
-                        flashMsg('Location removed')
+                        flashMsg(`${location.name} has been Removed!`)
                         unDisplayLoc()
                         loadAndRenderLocs()
                     })
@@ -118,13 +118,13 @@ function onSearchAddress(ev) {
 }
 
 function onAddLoc(geo) {
-    const modal = document.getElementById("addLocModal")
+    const modal = document.getElementById("setLocModal")
     modal.style.display = "block";
     document.getElementById('geoData').value = JSON.stringify(geo);
     document.getElementById('locName').value = geo.address || 'Just a place'
 
-    const form = document.getElementById("addLocForm")
-    form.onsubmit = function(event) {
+    const form = document.getElementById("setLocForm")
+    form.onsubmit = function (event) {
         event.preventDefault()
         const locName = document.getElementById('locName').value
         const locRate = +document.getElementById('locRate').value
@@ -140,21 +140,25 @@ function onAddLoc(geo) {
 
         locService.save(loc)
             .then((savedLoc) => {
-                flashMsg(`Added Location (id: ${savedLoc.id})`)
-                utilService.updateQueryParams({ locId: savedLoc.id })
-                loadAndRenderLocs();
-                closeModal()        
+                flashMsg(`Set Location (id: ${savedLoc.id})`)
+                utilService.updateQueryParams({
+                    locId: savedLoc.id
                 })
+                loadAndRenderLocs()
+                closeModal()
+            })
             .catch(err => {
                 console.error('OOPs:', err)
                 flashMsg('Cannot add location')
             })
     }
 }
+
 function closeModal() {
-    const modal = document.getElementById("addLocModal")
+    const modal = document.getElementById("setLocModal")
     modal.style.display = "none"
 }
+
 function loadAndRenderLocs() {
     locService.query()
         .then(renderLocs)
@@ -182,24 +186,34 @@ function onPanToUserPos() {
 }
 
 function onUpdateLoc(locId) {
+    const modal = document.getElementById("setLocModal")
+    modal.style.display = "block";
     locService.getById(locId)
         .then(loc => {
-            const rate = prompt('New rate?', loc.rate)
-            if (rate !== loc.rate) {
-                loc.rate = rate
+            let locName = document.getElementById('locName')
+            let locRate = document.getElementById('locRate')
+            locName.value = loc.name
+            locRate.value = loc.rate
+            const form = document.getElementById("setLocForm")
+            form.onsubmit = function (event) {
+                loc.name = locName.value
+                loc.rate = locRate.value
+                event.preventDefault()
                 locService.save(loc)
                     .then(savedLoc => {
-                        flashMsg(`Rate was set to: ${savedLoc.rate}`)
+                        flashMsg(`Set Location (id: ${savedLoc.id})`)
                         loadAndRenderLocs()
+                        closeModal()
                     })
                     .catch(err => {
                         console.error('OOPs:', err)
                         flashMsg('Cannot update location')
                     })
-
             }
+
         })
 }
+
 
 function onSelectLoc(locId) {
     return locService.getById(locId)
