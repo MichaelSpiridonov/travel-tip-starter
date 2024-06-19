@@ -122,6 +122,7 @@ function onAddLoc(geo) {
     modal.style.display = "block";
     document.getElementById('geoData').value = JSON.stringify(geo);
     document.getElementById('locName').value = geo.address || 'Just a place'
+    document.getElementById('locRate').value = 3
 
     const form = document.getElementById("setLocForm")
     form.onsubmit = function (event) {
